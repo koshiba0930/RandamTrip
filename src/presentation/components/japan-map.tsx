@@ -27,7 +27,7 @@ export function JapanMap({ highlightedPrefecture, isAnimating }: Props) {
     prefectures.forEach((prefecture) => {
       const element = prefecture as SVGElement;
       element.style.fill = "#E5E7EB";
-      element.style.transition = "fill 0.2s ease";
+      element.style.transition = "fill 0.25s ease-out";
     });
   }, [svgContent]);
 
@@ -41,15 +41,19 @@ export function JapanMap({ highlightedPrefecture, isAnimating }: Props) {
 
     if (isAnimating) {
       const prefectures = Object.keys(PREFECTURE_TO_CLASS_ID);
+      let currentIndex = 0;
 
       const animate = () => {
         if (!containerRef.current) return;
 
-        if (previousHighlightRef.current) {
-          previousHighlightRef.current.style.fill = "#E5E7EB";
-        }
+        let attempts = 0;
+        let randomIndex;
+        do {
+          randomIndex = Math.floor(Math.random() * prefectures.length);
+          attempts++;
+        } while (randomIndex === currentIndex && attempts < 5);
 
-        const randomIndex = Math.floor(Math.random() * prefectures.length);
+        currentIndex = randomIndex;
         const randomPrefecture = prefectures[randomIndex];
         const classId = PREFECTURE_TO_CLASS_ID[randomPrefecture];
 
@@ -58,6 +62,9 @@ export function JapanMap({ highlightedPrefecture, isAnimating }: Props) {
             `.${classId}`
           ) as SVGElement;
           if (target) {
+            if (previousHighlightRef.current) {
+              previousHighlightRef.current.style.fill = "#E5E7EB";
+            }
             target.style.fill = "#93C5FD";
             previousHighlightRef.current = target;
           }
@@ -65,7 +72,7 @@ export function JapanMap({ highlightedPrefecture, isAnimating }: Props) {
       };
 
       animate();
-      intervalRef.current = setInterval(animate, 800);
+      intervalRef.current = setInterval(animate, 180);
     } else {
       if (previousHighlightRef.current) {
         previousHighlightRef.current.style.fill = "#E5E7EB";
@@ -94,20 +101,20 @@ export function JapanMap({ highlightedPrefecture, isAnimating }: Props) {
     }
   }, [highlightedPrefecture, isAnimating]);
 
-  if (!svgContent) {
-    return (
-      <div className="w-full max-w-4xl mx-auto h-[600px] flex items-center justify-center">
-        <div className="animate-pulse text-gray-400">読み込み中...</div>
-      </div>
-    );
-  }
-
   return (
-    <div
-      ref={containerRef}
-      id="japan-map-container"
-      className="w-full max-w-4xl mx-auto opacity-100"
-      dangerouslySetInnerHTML={{ __html: svgContent }}
-    />
+    <div className="w-full max-w-4xl mx-auto aspect-square">
+      {!svgContent ? (
+        <div className="w-full h-full flex items-center justify-center">
+          <div className="animate-pulse text-gray-400">読み込み中...</div>
+        </div>
+      ) : (
+        <div
+          ref={containerRef}
+          id="japan-map-container"
+          className="w-full h-full"
+          dangerouslySetInnerHTML={{ __html: svgContent }}
+        />
+      )}
+    </div>
   );
 }

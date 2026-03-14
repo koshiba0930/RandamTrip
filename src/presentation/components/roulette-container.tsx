@@ -31,26 +31,42 @@ export function RouletteContainer({ spots }: Props) {
   const currentSpot = getCurrentSpot();
 
   return (
-    <main className="flex flex-col items-center gap-10">
+    <main className="flex flex-col items-center gap-10 w-full">
       <JapanMap
         highlightedPrefecture={highlightedPrefecture}
         isAnimating={isAnimating}
       />
 
-      {currentSpot && (
-        <ResultDisplay
-          spot={currentSpot}
-          onRetry={() => {
-            reset();
-            spin();
-          }}
-          isResult={state.phase === "result"}
-        />
-      )}
+      <div className="flex flex-col items-center gap-6 min-h-[500px] justify-start">
+        {state.phase === "idle" && (
+          <div className="flex flex-col items-center">
+            <RouletteButton onClick={spin} />
+          </div>
+        )}
 
-      {state.phase === "idle" && <RouletteButton onClick={spin} />}
+        {state.phase === "spinning" && (
+          <div className="flex flex-col items-center">
+            <StopButton onClick={stop} />
+          </div>
+        )}
 
-      {state.phase === "spinning" && <StopButton onClick={stop} />}
+        {state.phase === "stopping" && (
+          <div className="flex flex-col items-center h-6">
+            {/* スペース確保のための空div */}
+          </div>
+        )}
+
+        {currentSpot && state.phase === "result" && (
+          <ResultDisplay
+            spot={currentSpot}
+            onRetry={() => {
+              reset();
+              spin();
+            }}
+            isResult={true}
+          />
+        )}
+      </div>
     </main>
   );
 }

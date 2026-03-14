@@ -11,9 +11,15 @@ type RouletteState =
   | { phase: "stopping"; displaySpot: Spot }
   | { phase: "result"; spot: Spot };
 
-const SPIN_INTERVAL = 50;
-const DECELERATION = 1.3;
-const MAX_INTERVAL = 500;
+const SPIN_INTERVAL = 40;
+const INITIAL_SLOW_INTERVAL = 120; // 止めるボタン押下後の初期速度
+const TOTAL_DECELERATION_STEPS = 10; // 減速ステップ数
+const MAX_INTERVAL = 450; // 最終停止時の間隔
+
+// easeOutQuart イージング関数: 1 - (1 - x)^4
+const easeOutQuart = (x: number): number => {
+  return 1 - Math.pow(1 - x, 4);
+};
 
 export function useRoulette(repository: SpotRepository) {
   const [state, setState] = useState<RouletteState>({ phase: "idle" });
@@ -48,12 +54,19 @@ export function useRoulette(repository: SpotRepository) {
   const stop = useCallback(() => {
     clearTimer();
     const finalSpot = useCase.current.execute();
-    let interval = SPIN_INTERVAL;
+    let step = 0;
 
     const decelerate = () => {
-      interval = interval * DECELERATION;
+      step++;
 
-      if (interval >= MAX_INTERVAL) {
+      // easeOutQuart イージングを使用した減速曲線
+      // progress: 0 → 1 に向かって滑らかに変化（4次関数で減速）
+      const normalizedProgress = Math.min(step / TOTAL_DECELERATION_STEPS, 1);
+      const easedProgress = easeOutQuart(normalizedProgress);
+      const interval = INITIAL_SLOW_INTERVAL +
+        (MAX_INTERVAL - INITIAL_SLOW_INTERVAL) * easedProgress;
+
+      if (step >= TOTAL_DECELERATION_STEPS) {
         setState({ phase: "result", spot: finalSpot });
         return;
       }
