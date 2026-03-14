@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:ja.wikipedia.org)",
+      "WebSearch",
+      "WebFetch(domain:en.wikipedia.org)",
+      "WebFetch(domain:www.geospatial.jp)",
+      "Bash(pip3 list:*)",
+      "Bash(python3:*)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:geolonia.github.io)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(npx:*)",
+      "Bash(curl:*)",
+      "Bash(npm run build:*)"
+    ]
+  }
+}

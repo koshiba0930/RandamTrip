@@ -13,7 +13,6 @@ export default async function Home() {
   } catch {
     // microCMS unavailable — fall back to static data
   }
-
   return (
     <div className="flex min-h-svh flex-col items-center justify-center bg-gradient-to-b from-slate-50 to-white px-4">
       <header className="mb-16 text-center">
